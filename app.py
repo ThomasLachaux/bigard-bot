@@ -5,11 +5,11 @@ from time import sleep
 from os import environ
 import schedule
 
-if 'SLACK_WEBHOOK' not in environ or 'SEND_HOUR' not in environ:
+if 'WEBHOOK' not in environ or 'SEND_HOUR' not in environ:
     print('Missing environments variables')
     exit(1)
 
-slack_webhook = environ['SLACK_WEBHOOK']
+webhook = environ['WEBHOOK']
 send_hour = environ['SEND_HOUR']
 
 jokes = ['']
@@ -43,7 +43,7 @@ def send_joke():
 
     slack_data = {'text': joke}
 
-    response = post(slack_webhook, data=dumps(slack_data), headers={'Content-Type': 'application/json'})
+    response = post(webhook, data=dumps(slack_data), headers={'Content-Type': 'application/json'})
 
     print('Day {}: Send joke {}. Status code: {}'.format(now, joke_index, response.status_code))
 
