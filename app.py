@@ -47,6 +47,11 @@ with open('jokes.txt', 'r', encoding='utf8') as file:
 # Removes the last \n for each jokes
 jokes = [blague[:-1] for blague in jokes]
 
+for i, joke in enumerate(jokes):
+    if len(joke) == 0:
+        log("A joke is empty ! Or unexpected token. Stopped at {}. Joke before:\n{}".format(i, jokes[i - 1]))
+        exit(1)
+
 log('Bigard bot !')
 log('There are {} jokes available'.format(len(jokes)))
 log('Scheduled to send a joke every day at {}. Timezone {}'.format(send_hour, timezone))
