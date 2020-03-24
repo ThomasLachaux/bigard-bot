@@ -1,9 +1,8 @@
-from datetime import datetime
 from requests import post
 from json import dumps
 from time import sleep
 from os import environ
-import schedule
+import arrow
 
 if 'WEBHOOK' not in environ or 'SEND_HOUR' not in environ:
     print('Missing environments variables')
@@ -11,6 +10,7 @@ if 'WEBHOOK' not in environ or 'SEND_HOUR' not in environ:
 
 webhook = environ['WEBHOOK']
 send_hour = environ['SEND_HOUR']
+timezone = 'Europe/Paris'
 
 jokes = ['']
 
@@ -32,25 +32,45 @@ jokes = [blague[:-1] for blague in jokes]
 
 print('Bigard bot !')
 print('There are {} jokes available'.format(len(jokes)))
-print('Scheduled to send a joke every day at {}'.format(send_hour))
+print('Scheduled to send a joke every day at {}. Timezone {}'.format(send_hour, timezone))
 
+def now():
+    """
+    Return the current date with the correct timezone
+    """
+    return arrow.now(timezone)
+
+def log(message):
+    print('[{}] {}'.format(now().format('YYYY-MM-DD HH:mm:ss'), message))
+
+def current_hour():
+    """
+    Returns the current time with the correct timezone
+    """
+    return now().format('HH:mm')
+
+def current_day():
+    """
+    Returns the current day (from the begenning of the year from 1 to 366
+    """
+    return int(now().format('DDD'))
 
 def send_joke():
-    # Gets the current day (from 1 to 366)
-    now = int(datetime.now().strftime('%j'))
-    joke_index = now % len(jokes)
+    joke_index = current_day() % len(jokes)
     joke = jokes[joke_index]
 
     slack_data = {'text': joke}
 
     response = post(webhook, data=dumps(slack_data), headers={'Content-Type': 'application/json'})
 
-    print('Day {}: Send joke {}. Status code: {}'.format(now, joke_index, response.status_code))
+    log('Sent joke {} - Response {}'.format(joke_index, response.status_code))
 
-
-schedule.every().day.at(send_hour).do(send_joke)
 
 # Checks every minutes if it's time to send a message
 while True:
-    schedule.run_pending()
-    sleep(60)
+    if send_hour == current_hour():
+        send_joke()
+
+    # Sleeps until the next minute  and zero seconds
+    sleep_time = 60 - int(now().format('ss'))
+    sleep(sleep_time)
