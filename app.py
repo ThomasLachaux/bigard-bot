@@ -4,13 +4,30 @@ from time import sleep
 from os import environ
 import arrow
 
-if 'WEBHOOK' not in environ or 'SEND_HOUR' not in environ:
-    print('Missing environments variables')
+timezone = 'Europe/Paris'
+SLACK = 'slack'
+DISCORD = 'discord'
+
+def now():
+    """
+    Return the current date with the correct timezone
+    """
+    return arrow.now(timezone)
+
+def log(message):
+    print('[{}] {}'.format(now().format('YYYY-MM-DD HH:mm:ss'), message))
+
+if 'WEBHOOK' not in environ or 'SEND_HOUR' not in environ or 'SERVICE' not in environ:
+    log('Missing environments variables')
     exit(1)
 
+service = environ['SERVICE']
 webhook = environ['WEBHOOK']
 send_hour = environ['SEND_HOUR']
-timezone = 'Europe/Paris'
+
+if service != SLACK and service != DISCORD:
+    log('Invalid service')
+    exit(1)
 
 jokes = ['']
 
@@ -30,18 +47,10 @@ with open('jokes.txt', 'r', encoding='utf8') as file:
 # Removes the last \n for each jokes
 jokes = [blague[:-1] for blague in jokes]
 
-print('Bigard bot !')
-print('There are {} jokes available'.format(len(jokes)))
-print('Scheduled to send a joke every day at {}. Timezone {}'.format(send_hour, timezone))
-
-def now():
-    """
-    Return the current date with the correct timezone
-    """
-    return arrow.now(timezone)
-
-def log(message):
-    print('[{}] {}'.format(now().format('YYYY-MM-DD HH:mm:ss'), message))
+log('Bigard bot !')
+log('There are {} jokes available'.format(len(jokes)))
+log('Scheduled to send a joke every day at {}. Timezone {}'.format(send_hour, timezone))
+log('Using {}'.format(service))
 
 def current_hour():
     """
@@ -55,13 +64,23 @@ def current_day():
     """
     return int(now().format('DDD'))
 
+def format_data(joke):
+    """
+    Returns the correct data format according to the service
+    """
+    if service == DISCORD:
+        return {'content': joke}
+
+    elif service == SLACK:
+        return {'text': joke}
+
 def send_joke():
     joke_index = current_day() % len(jokes)
     joke = jokes[joke_index]
 
-    slack_data = {'text': joke}
+    formatted_data = format_data(joke)
 
-    response = post(webhook, data=dumps(slack_data), headers={'Content-Type': 'application/json'})
+    response = post(webhook, data=dumps(formatted_data), headers={'Content-Type': 'application/json'})
 
     log('Sent joke {} - Response {}'.format(joke_index, response.status_code))
 

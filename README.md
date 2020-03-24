@@ -8,8 +8,9 @@ pip install -r requirements.txt
 
 ## Start script
 You must start the script with environment variables
-- The webhook url
-- The hour to send every day (eg: 09:00, 10:00, 13:00...)
+- **WEBHOOK**: The webhook url
+- **SEND_HOUR**: The hour to send every day (eg: 09:00, 10:00, 13:00...)
+- **SERVICE**: The service name (discord or slack)
 ```
-WEBHOOK=<webhook-url> SEND_HOUR="10:00" python app.py
+WEBHOOK=<webhook-url> SEND_HOUR="10:00" SERVICE="slack" python app.py
 ```
