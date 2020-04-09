@@ -9,6 +9,7 @@ const answers = [
   'je vais te goomer',
   'Va manger tes grands morts',
   "J'VAIS PRENDRE T'ES GRANDS MORTS ET EN FAIRE UNE MARINADE ET TU LA BOUFFERAS PAR LE NEZ",
+  'ESPECE DE SALE PICARD, VA BAISER TA TANTE',
 ];
 
 const log = (msg) => {
