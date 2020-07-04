@@ -26,43 +26,65 @@ const instance = axios.create({
   },
 });
 
-const react = (name, timestamp) => {
-  return instance.post('reactions.add', {
-    channel: process.env.BIGARD_CHANNEL,
-    name,
-    timestamp,
-  });
-};
+//app.use(bodyParser.text());
+app.use(bodyParser.json());
 
-const reply = (timestamp) => {
-  return instance.post('chat.postMessage', {
-    channel: process.env.BIGARD_CHANNEL,
-    text: "OUAIS C'EST D'LA BLAGUE !",
-    thread_ts: timestamp,
-  });
-};
-
-app.use(bodyParser.text());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/', async (req, res) => {
-  if (req.body.user_id !== process.env.FAVORITE_USER) {
-    log(`Incorrect message from ${req.body.user_id}`);
-    const anwser = answers[Math.floor(Math.random() * answers.length)];
+  // Respond to url challenge
+  if (req.body.type === 'url_verification') {
+    return res.status(200).send(req.body.challenge).end();
+  }
 
-    log(req.body.timestamp);
+  // response to Slack as quickly as possible to avoid resend event
+  res.status(200).end();
 
-    await react('nazi', req.body.timestamp);
+  const { event } = req.body;
 
-    res
-      .status(200)
-      .json({
-        text: `<@${req.body.user_id}> ${anwser}`,
-      })
-      .end();
-  } else {
-    await react('heart_eyes', req.body.timestamp);
-    await reply(req.body.timestamp);
-    log('Correct message !');
+  const reply = (message) => {
+    log(`Post message ${message}`);
+    return instance.post('chat.postMessage', {
+      channel: event.channel,
+      text: message,
+    });
+  };
+
+  const react = (name) => {
+    return instance.post('reactions.add', {
+      channel: event.channel,
+      name,
+      timestamp: event.ts,
+    });
+  };
+
+  // Normalize white spaces
+  event.text = event.text.replace(/\s+/g, ' ');
+
+  // Check if the event is a message and not from a bot
+  if (req.body.type === 'event_callback' && !event.bot_id) {
+    // REPEAT RESPONSE
+    let regex = /[Dd][iI](.*)/g;
+    let match;
+    while ((match = regex.exec(event.text))) {
+      const answer = match[1];
+      if (answer.length >= 2) {
+        await reply(answer);
+      }
+    }
+    // console.log(event.text.charAt(5));
+    // console.log(event.text.charCodeAt(5));
+    // console.log(' '.charCodeAt(0));
+    // INSULT/LOVE RESPONSE
+    if (event.text.startsWith("C'EST D'LA BLAGUE OU PAS")) {
+      // If Fabien
+      if (event.user !== process.env.FAVORITE_USER) {
+        const answer = answers[Math.floor(Math.random() * answers.length)];
+        reply(`<@${event.user}> ${answer}`);
+        react('nazi');
+      } else {
+        reply("OUAIS C'EST D'LA BLAGUE !");
+        react('heart_eyes');
+      }
+    }
   }
 
   return res.status(200).end();
