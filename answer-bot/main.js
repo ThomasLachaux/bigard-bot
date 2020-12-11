@@ -62,14 +62,14 @@ app.post('/', async (req, res) => {
   // Check if the event is a message and not from a bot
   if (req.body.type === 'event_callback' && !event.bot_id) {
     // REPEAT RESPONSE
-    let regex = /[Dd][iI](.*)/g;
-    let match;
-    while ((match = regex.exec(event.text))) {
-      const answer = match[1];
-      if (answer.length >= 2) {
-        await reply(answer);
-      }
-    }
+    // let regex = /[Dd][iI](.*)/g;
+    // let match;
+    // while ((match = regex.exec(event.text))) {
+    //   const answer = match[1];
+    //   if (answer.length >= 2) {
+    //     await reply(answer);
+    //   }
+    // }
     // console.log(event.text.charAt(5));
     // console.log(event.text.charCodeAt(5));
     // console.log(' '.charCodeAt(0));
