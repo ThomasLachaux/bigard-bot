@@ -23,9 +23,6 @@ slack_channel = environ['SLACK_CHANNEL']
 slack_bot_token = environ['SLACK_BOT_TOKEN']
 send_hour = environ['SEND_HOUR']
 
-print(slack_channel)
-print(slack_bot_token)
-
 jokes = ['']
 
 with open('jokes.txt', 'r', encoding='utf8') as file:
@@ -75,8 +72,6 @@ def send_joke():
     print(response.__dict__)
 
     log('Sent joke {} - Response {}'.format(joke_index, response.status_code))
-
-send_joke()
 
 # Checks every minutes if it's time to send a message
 while True:
