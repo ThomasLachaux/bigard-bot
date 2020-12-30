@@ -5,8 +5,6 @@ from os import environ
 import arrow
 
 timezone = 'Europe/Paris'
-SLACK = 'slack'
-DISCORD = 'discord'
 
 def now():
     """
@@ -17,17 +15,16 @@ def now():
 def log(message):
     print('[{}] {}'.format(now().format('YYYY-MM-DD HH:mm:ss'), message))
 
-if 'WEBHOOK' not in environ or 'SEND_HOUR' not in environ or 'SERVICE' not in environ:
+if 'SLACK_CHANNEL' not in environ or 'SLACK_BOT_TOKEN' not in environ or 'SEND_HOUR' not in environ:
     log('Missing environments variables')
     exit(1)
 
-service = environ['SERVICE']
-webhook = environ['WEBHOOK']
+slack_channel = environ['SLACK_CHANNEL']
+slack_bot_token = environ['SLACK_BOT_TOKEN']
 send_hour = environ['SEND_HOUR']
 
-if service != SLACK and service != DISCORD:
-    log('Invalid service')
-    exit(1)
+print(slack_channel)
+print(slack_bot_token)
 
 jokes = ['']
 
@@ -55,7 +52,6 @@ for i, joke in enumerate(jokes):
 log('Bigard bot !')
 log('There are {} jokes available'.format(len(jokes)))
 log('Scheduled to send a joke every day at {}. Timezone {}'.format(send_hour, timezone))
-log('Using {}'.format(service))
 
 def current_hour():
     """
@@ -69,26 +65,18 @@ def current_day():
     """
     return int(now().format('DDD'))
 
-def format_data(joke):
-    """
-    Returns the correct data format according to the service
-    """
-    if service == DISCORD:
-        return {'content': joke}
-
-    elif service == SLACK:
-        return {'text': joke}
-
 def send_joke():
     joke_index = current_day() % len(jokes)
     joke = jokes[joke_index]
 
-    formatted_data = format_data(joke)
+    formatted_data = {'token': slack_bot_token, 'channel': slack_channel, 'text': joke}
 
-    response = post(webhook, data=dumps(formatted_data), headers={'Content-Type': 'application/json'})
+    response = post("https://slack.com/api/chat.postMessage", data=formatted_data, headers={'Content-Type': 'application/x-www-form-urlencoded'})
+    print(response.__dict__)
 
     log('Sent joke {} - Response {}'.format(joke_index, response.status_code))
 
+send_joke()
 
 # Checks every minutes if it's time to send a message
 while True:
