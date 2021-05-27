@@ -8,12 +8,12 @@ const web = new WebClient(process.env.SLACK_BOT_TOKEN);
 const slackEvents = createEventAdapter(process.env.SLACK_SIGNING_SECRET);
 
 slackEvents.on('message', (event) => {
-  console.log(event);
   // Ignore the message if it is not one, or sent by another bot
   if (event.type !== 'message' || event.subtype === 'bot_message') return;
 
   // If is quoi
   if (event.text.match(/quoi *[\!\?]*$/i)) {
+    console.log(`Answer quoi to ${event.user}`);
     web.chat.postMessage({
       channel: event.channel,
       text: 'feur',
