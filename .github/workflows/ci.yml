@@ -1,0 +1,22 @@
+name: CI
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install oc
+        uses: redhat-actions/oc-installer@v1
+        with:
+          oc_version: '3.11'
+      - name: Login to OpenShift
+        run: oc login --token=${{ secrets.OPENSHIFT_TOKEN }} --server=${{ secrets.OPENSHIFT_SERVER }}
+
+      - name: Change the project
+        run: oc project ${{ secrets.OPENSHIFT_PROJECT }}
+
+      - name: Start the build
+        run: oc start build ${{ secrets.OPENSHIFT_RESOURCE }} --follow
