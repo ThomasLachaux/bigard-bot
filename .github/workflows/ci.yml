@@ -11,7 +11,7 @@ jobs:
       - name: Install oc
         uses: redhat-actions/oc-installer@v1
         with:
-          oc_version: '3.11'
+          oc_version: '4.6'
       - name: Login to OpenShift
         run: oc login --token=${{ secrets.OPENSHIFT_TOKEN }} --server=${{ secrets.OPENSHIFT_SERVER }}
 
