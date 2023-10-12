@@ -9,7 +9,7 @@
     "dev": "ts-node-dev --no-notify --exit-child src/main.ts"
   },
   "dependencies": {
-    "@slack/events-api": "^3.0.0",
+    "@slack/events-api": "^3.0.1",
     "@slack/web-api": "^6.2.3",
     "@types/node": "^15.6.1",
     "dotenv": "^10.0.0",
