@@ -11,7 +11,7 @@
   "dependencies": {
     "@slack/events-api": "^3.0.0",
     "@slack/web-api": "^6.2.3",
-    "@types/node": "^15.6.1",
+    "@types/node": "^15.14.9",
     "dotenv": "^10.0.0",
     "typescript": "^4.3.2"
   },
